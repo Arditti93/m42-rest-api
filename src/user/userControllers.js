@@ -1,10 +1,13 @@
 const User = require("./userModels");
+const jwt = require("jsonwebtoken")
 
 exports.createUser = async (request, response) => {
     try {
         const newUser = await User.create(request.body);
+        const token = await jwt.sign({_id: newUser._id}, process.env.SECRET)
         console.log("SUCCESFUL", newUser);
-        response.status(201).send({ user: newUser.username });
+        console.log(token)
+        response.status(201).send({ user: newUser.username, token });
     } catch (error) {
         console.log(error);
         response.status(500).send({error: error.message});
@@ -21,7 +24,6 @@ exports.readUsers = async (request, response) => {
         response.status(500).send({error: error.message});
     }
 }
-
 
 exports.updateUser = async (request, response) => {
     try {
@@ -48,13 +50,21 @@ exports.deleteUser = async (request, response) => {
 
 exports.loginUser = async (request, response) => {
     try {
-        const user = await User.findOne({username: request.body.username})
-        response.status(200).send({username: user.username})
+        if (request.authUser) {
+            console.log("token exists continue to login")
+            response.status(200).send({username: request.user.username})  
+        } else {
+            const user = await User.findOne({username: request.body.username})
+            const token = await jwt.sign({_id: user._id}, process.env.SECRET)
+            console.log("token not passed continue login and generate a new token")
+            response.status(200).send({username: user.username, token})
+        }
     } catch (error) {
         console.log(error);
         response.status(500).send({error: error.message});
     }
 }
+
 
 
 
