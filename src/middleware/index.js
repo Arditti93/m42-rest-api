@@ -16,12 +16,17 @@ exports.hashPass = async (request, response, next) => {
 //TODO: write middleware function to compare plain text password with hashed password
 exports.comparePass = async (request, response, next) => {
     try {
-        request.user = await User.findOne({username: request.body.username})
-        if (request.user && await bcrypt.compare(request.body.password, request.user.password)) {
-            console.log("username and password exist in database")
+        if (request.authUser){
             next()
         } else {
-            throw new Error("Incorrect username or password")
+            request.user = await User.findOne({username: request.body.username})
+            if (request.user && await bcrypt.compare(request.body.password, request.user.password)) {
+                console.log("username and password exist in database")
+                next()
+            } else {
+                throw new Error("Incorrect username or password")
+            }
+
         }
     } catch (error) {
         console.log(error)
@@ -33,13 +38,9 @@ exports.tokenCheck = async (request, response, next) => {
     try {
         if (request.header("Authorization")){
             const token = request.header("Authorization").replace("Bearer ", "")
+            console.log(token)
             const decodedToken = await jwt.verify(token, process.env.SECRET)
             const user = await User.findById(decodedToken._id)
-            if (user) {
-                request.user = user
-            } else {
-                throw new Error ("user doesn't exist")
-            }
             request.authUser = user
             console.log("headers passed")
         } else {

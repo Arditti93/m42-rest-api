@@ -17,7 +17,6 @@ exports.createUser = async (request, response) => {
 exports.readUsers = async (request, response) => {
     try {
         const users = await User.find({})
-        console.log(users)
         response.status(200).send({user: users})
     } catch (error) {
         console.log(error);
@@ -51,8 +50,10 @@ exports.deleteUser = async (request, response) => {
 exports.loginUser = async (request, response) => {
     try {
         if (request.authUser) {
+            console.log(request.authUser)
+            console.log('auth user exists')
             console.log("token exists continue to login")
-            response.status(200).send({username: request.user.username})  
+            response.status(200).send({username: request.authUser.username})  
         } else {
             const user = await User.findOne({username: request.body.username})
             const token = await jwt.sign({_id: user._id}, process.env.SECRET)
