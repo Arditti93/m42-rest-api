@@ -8,7 +8,7 @@ const userRouter = Router();
 userRouter.post('/addUser', validateEmail, hashPass, createUser);
 //TODO: call middleware function below
 userRouter.post('/loginUser', tokenCheck, comparePass, loginUser)
-userRouter.get('/readUsers', tokenCheck, readUsers)
+userRouter.get('/readUsers', readUsers)
 userRouter.put('/updateUser',updateUser) 
 userRouter.delete('/deleteUser', deleteUser)
 
